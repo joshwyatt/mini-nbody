@@ -36,10 +36,10 @@ void bodyForce(Body *p, float dt, int n) {
 }
 
 int main(const int argc, const char** argv) {
-  
+
   int nBodies = 30000;
   if (argc > 1) nBodies = atoi(argv[1]);
-  
+
   const float dt = 0.01f; // time step
   const int nIters = 10;  // simulation iterations
 
@@ -54,7 +54,7 @@ int main(const int argc, const char** argv) {
   Body *d_p = (Body*)d_buf;
 
   int nBlocks = (nBodies + BLOCK_SIZE - 1) / BLOCK_SIZE;
-  double totalTime = 0.0; 
+  double totalTime = 0.0;
 
   for (int iter = 1; iter <= nIters; iter++) {
     StartTimer();
@@ -71,13 +71,13 @@ int main(const int argc, const char** argv) {
 
     const double tElapsed = GetTimer() / 1000.0;
     if (iter > 1) { // First iter is warm up
-      totalTime += tElapsed; 
+      totalTime += tElapsed;
     }
 #ifndef SHMOO
     printf("Iteration %d: %.3f seconds\n", iter, tElapsed);
 #endif
   }
-  double avgTime = totalTime / (double)(nIters-1); 
+  double avgTime = totalTime / (double)(nIters-1);
 
 #ifdef SHMOO
   printf("%d, %0.3f\n", nBodies, 1e-9 * nBodies * nBodies / avgTime);
