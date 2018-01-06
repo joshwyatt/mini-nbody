@@ -44,14 +44,15 @@ int main(const int argc, const char** argv) {
   const int nIters = 10;  // simulation iterations
 
   int bytes = nBodies*sizeof(Body);
-  float *buf = (float*)malloc(bytes);
+  /* float *buf = (float*)malloc(bytes); */
+  cudaMallocManaged(&buf, bytes);
   Body *p = (Body*)buf;
 
   randomizeBodies(buf, 6*nBodies); // Init pos / vel data
 
-  float *d_buf;
-  cudaMalloc(&d_buf, bytes);
-  Body *d_p = (Body*)d_buf;
+  /* float *d_buf; */
+  /* cudaMalloc(&d_buf, bytes); */
+  /* Body *d_p = (Body*)d_buf; */
 
   int nBlocks = (nBodies + BLOCK_SIZE - 1) / BLOCK_SIZE;
   double totalTime = 0.0;
@@ -59,9 +60,11 @@ int main(const int argc, const char** argv) {
   for (int iter = 1; iter <= nIters; iter++) {
     StartTimer();
 
-    cudaMemcpy(d_buf, buf, bytes, cudaMemcpyHostToDevice);
-    bodyForce<<<nBlocks, BLOCK_SIZE>>>(d_p, dt, nBodies); // compute interbody forces
-    cudaMemcpy(buf, d_buf, bytes, cudaMemcpyDeviceToHost);
+    /* cudaMemcpy(d_buf, buf, bytes, cudaMemcpyHostToDevice); */
+    /* bodyForce<<<nBlocks, BLOCK_SIZE>>>(d_p, dt, nBodies); // compute interbody forces */
+    bodyForce<<<nBlocks, BLOCK_SIZE>>>(p, dt, nBodies); // compute interbody forces
+    cudaDeviceSynchronize();
+    /* cudaMemcpy(buf, d_buf, bytes, cudaMemcpyDeviceToHost); */
 
     for (int i = 0 ; i < nBodies; i++) { // integrate position
       p[i].x += p[i].vx*dt;
@@ -86,6 +89,6 @@ int main(const int argc, const char** argv) {
          nIters, rate);
   printf("%d Bodies: average %0.3f Billion Interactions / second\n", nBodies, 1e-9 * nBodies * nBodies / avgTime);
 #endif
-  free(buf);
+  /* free(buf); */
   cudaFree(d_buf);
 }
